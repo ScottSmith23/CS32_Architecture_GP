@@ -56,6 +56,9 @@ op_size = 1
 # inside this we will have our FETCH, DECODE, EXECUTE CYCLE
 while running:
     # FETCH
+    HLT = 1
+    LDI = 10000010 
+    PRN = 1000111
     cmd = memory[pc]
 
     # DECODE
