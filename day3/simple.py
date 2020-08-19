@@ -18,6 +18,9 @@ PRINT_NUM = 3
 SAVE = 4
 PRINT_REG = 5
 ADD = 6
+# TODO: PUSH and POP
+PUSH = 7
+POP = 8
 SUB = 23
 LDI = 0b10000010
 PRN = 0b01000111
@@ -52,28 +55,6 @@ def load_memory(filename):
 memory = [0] * 256
 
 
-# memory = [
-#     PRINT_VLAD,
-#     SAVE,
-#     300,
-#     3,
-#     PRINT_REG,
-#     3,
-#     SAVE,
-#     24,
-#     2,
-#     ADD,
-#     2,
-#     3,
-#     PRINT_REG,
-#     2,
-#     PRINT_NUM,
-#     120,
-#     PRINT_VLAD,
-#     HALT
-# ]
-
-
 # keep track of running?
 running = True
 
@@ -82,14 +63,23 @@ pc = 0
 # Some local var holders [registers]
 registers = [0] * 10
 
+# TODO: Stack Pointer (R7) as per specs
+# index of the registers list 
+# SP
+SP = 7
+
+# to use to store where the top of the stack is
+# 0xF4 (244)
+registers[SP] = 244
+
 # size of opcode
 op_size = 1
 
-# TODO: grab any args
+# grab any args
 if len(sys.argv) != 2:
     print("usage: simple.py filename")
     sys.exit(1)
-# TODO: load opcodes in to memory
+# load opcodes in to memory
 load_memory(sys.argv[1])
 
 
@@ -135,6 +125,38 @@ while running:
         registers[reg_index_a] -= registers[reg_index_b]
 
         op_size = 3
+    
+    # PUSH
+    elif cmd == PUSH:
+        # setup
+        reg_index = memory[pc + 1]
+        val = registers[reg_index]
+
+        # decrememt Stack Pointer
+        registers[SP] -= 1
+
+        # insert val on to the stack
+        memory[registers[SP]] = val
+
+        op_size = 2
+
+    # TODO: POP
+    elif cmd == POP:
+        # setup
+        reg_index = memory[pc + 1]
+        val = memory[registers[SP]]
+
+        # take value from stack and put it in reg
+        registers[reg_index] = val
+
+        # increment Stack Pointer
+        registers[SP] += 1
+
+        op_size = 2
+
+    else:
+        print(f"Invalid Instruction: {cmd}")
+        running = False
 
 
     pc += op_size
